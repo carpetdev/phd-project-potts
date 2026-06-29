@@ -13,8 +13,6 @@ using Random
 import PolynomialRoots
 import AMRVW
 
-Plots.default(aspect_ratio=:equal, markersize=3, legend=false)
-
 function bairstow(P::Polynomial)
     P₀ = P
     preroots = Vector{ComplexF64}()
@@ -222,11 +220,14 @@ end
 #endregion
 
 function plot(q::Int, n::Int)
-    scatter(AMRVW.roots(BigFloat.(coeffs(Load.part(q, n)))))
+    Plots.default(aspect_ratio=:equal, markersize=3, legend=false)
+    theme(:juno)
+
+    display(scatter(AMRVW.roots(BigFloat.(coeffs(Load.part(q, n))))))
 end
 
 function plot′(q::Int, n::Int)
-    scatter(AMRVW.roots(BigFloat.(coeffs(Load.part′(q, n)))))
+    display(scatter(AMRVW.roots(BigFloat.(coeffs(Load.part′(q, n))))))
 end
 
 end

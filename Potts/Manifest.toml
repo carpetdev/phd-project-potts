@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "0ff8f2d0def2d95ca78cdf8ff8fb3c6ecb77cce5"
+project_hash = "89ed5412819da1aeb183367baf42f11ea98359f1"
 
 [[deps.AMRVW]]
 deps = ["LinearAlgebra", "Random"]
@@ -670,10 +670,10 @@ version = "4.1.1"
     RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 
 [[deps.Potts]]
-deps = ["AMRVW", "Bijections", "BitIntegers", "Combinatorics", "FromFile", "JSON", "LinearAlgebra", "OrderedCollections", "Plots", "PolynomialRoots", "Polynomials", "ProgressLogging", "Random"]
+deps = ["AMRVW", "Bijections", "BitIntegers", "Combinatorics", "FromFile", "JSON", "LinearAlgebra", "OrderedCollections", "Plots", "PolynomialRoots", "Polynomials", "PrecompileTools", "ProgressLogging", "Random"]
 path = "."
 uuid = "6add209f-8b80-4b6d-bc64-86d6ecc52c89"
-version = "0.1.0"
+version = "0.2.0"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
