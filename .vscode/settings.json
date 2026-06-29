@@ -1,0 +1,14 @@
+{
+  "terminal.integrated.commandsToSkipShell": ["-language-julia.interrupt"],
+  "[julia]": {
+    "editor.quickSuggestions": {
+      "strings": "off",
+      "comments": "off",
+      "other": "off"
+    }
+  },
+  "julia.lint.iter": false,
+  "julia.lint.call": false,
+  "julia.NumThreads": "auto",
+  "julia.additionalArgs": ["--project=Potts"]
+}
