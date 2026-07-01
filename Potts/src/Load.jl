@@ -1,6 +1,6 @@
 module Load
 
-export SymmetryData
+export SymmetryData, data_pather
 
 using Polynomials
 using JSON
@@ -12,16 +12,20 @@ struct SymmetryData{q,n}
     ordered_configs::Vector{NTuple{n,Int}}
 end
 
+function data_pather(rel_path::String)
+    return joinpath(Base.active_project(), "..", "..", "data", rel_path)
+end
+
 function part(q::Int, n::Int)
-    return JSON.parsefile("data/parts/$(q)_$(n).json", Polynomial{BigInt})
+    return JSON.parsefile(data_pather("parts/$(q)_$(n).json"), Polynomial{BigInt})
 end
 
 function part′(q::Int, n::Int)
-    return JSON.parsefile("data/parts/$(q)_$(n)'.json", Polynomial{BigInt})
+    return JSON.parsefile(data_pather("parts/$(q)_$(n)'.json"), Polynomial{BigInt})
 end
 
 function symmetry_class(q::Int, n::Int)
-    return JSON.parsefile("data/symmetry/$(q)_$(n).json", SymmetryData{q,n})
+    return JSON.parsefile(data_pather("symmetry/$(q)_$(n).json"), SymmetryData{q,n})
 end
 
 end
