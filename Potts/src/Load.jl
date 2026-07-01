@@ -13,7 +13,7 @@ struct SymmetryData{q,n}
 end
 
 function data_pather(rel_path::String)
-    return joinpath(Base.active_project(), "..", "..", "data", rel_path)
+    return abspath(Base.active_project(), "..", "..", "data", rel_path)
 end
 
 function part(q::Int, n::Int)
