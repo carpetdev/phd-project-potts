@@ -5,10 +5,14 @@
       "strings": "off",
       "comments": "off",
       "other": "off"
-    }
+    },
+    "editor.defaultFormatter": "aviatesk.jetls-client"
   },
   "julia.lint.iter": false,
   "julia.lint.call": false,
   "julia.NumThreads": "auto",
-  "julia.additionalArgs": ["--project=Potts"]
+  "julia.additionalArgs": ["--project=Potts"],
+  "jetls-client.settings": {
+    "inlay_hint": { "types": { "enabled": false } }
+  }
 }

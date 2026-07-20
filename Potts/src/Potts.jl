@@ -1,12 +1,11 @@
 module Potts
 
-export Partition, Roots, Save, Load
+export Partition, Roots, Utils, Save, Load
 
-using FromFile
-@from "Partition.jl" using Partition
-@from "Roots.jl" using Roots
-@from "Save.jl" using Save
-@from "Load.jl" using Load
+include("Utils.jl")
+include("Partition.jl")
+include("Roots.jl")
+include("Save.jl")
 
 using PrecompileTools
 using REPL.TerminalMenus
@@ -31,7 +30,7 @@ end
 
 function __init__()
     isinteractive() || return
-    menu = RadioMenu(["Plot roots of partition function", "Calculate partition function", "Calculate symmetry classes"], ctrl_c_interrupt=false)
+    menu = RadioMenu(["Plot roots of partition function", "Calculate partition function", "Calculate symmetry classes"], ctrl_c_interrupt = false)
     println("Choose an option (press ^C or q to cancel):")
     choice = request(menu)
 
@@ -63,8 +62,9 @@ function __init__()
         Roots.plot(q, n)
     end
 
+    println("Done!")
     println()
-    __init__()
+    return __init__()
 end
 
 end

@@ -1,7 +1,6 @@
 module Roots
 
-using FromFile
-@from "Load.jl" using Load
+using ..Load
 
 using Polynomials
 using Plots
@@ -18,24 +17,24 @@ function bairstow(P::Polynomial)
     preroots = Vector{ComplexF64}()
     while (n = degree(P)) > 1
         # println("Poly ", P)
-        u::BigFloat = P[n-1] != 0 ? P[n-1] / P[n] : 1 / P[n]
-        v::BigFloat = P[n-2] != 0 ? P[n-2] / P[n] : 1 / P[n]
+        u::BigFloat = P[n - 1] != 0 ? P[n - 1] / P[n] : 1 / P[n]
+        v::BigFloat = P[n - 2] != 0 ? P[n - 2] / P[n] : 1 / P[n]
         step = [Inf, Inf]
-        while sum(abs2, step) > 1e-25
+        while sum(abs2, step) > 1.0e-25
             # println("NR ", u, ' ', v)
             b = Vector(undef, n + 1)
-            b[begin+n] = b[begin+n-1] = 0
+            b[begin + n] = b[begin + n - 1] = 0
             f = Vector(undef, n + 1)
-            f[begin+n] = f[begin+n-1] = 0
-            for i in (n-2):-1:0
-                b[begin+i] = P[i+2] - u * b[begin+i+1] - v * b[begin+i+2]
-                f[begin+i] = b[begin+i+2] - u * f[begin+i+1] - v * f[begin+i+2]
+            f[begin + n] = f[begin + n - 1] = 0
+            for i in (n - 2):-1:0
+                b[begin + i] = P[i + 2] - u * b[begin + i + 1] - v * b[begin + i + 2]
+                f[begin + i] = b[begin + i + 2] - u * f[begin + i + 1] - v * f[begin + i + 2]
             end
-            c = P[1] - u * b[begin+0] - v * b[begin+1]
-            d = P[0] - v * b[begin+0]
-            g = b[begin+1] - u * f[begin+0] - v * f[begin+1]
-            h = b[begin+0] - v * f[begin+0]
-            step = 1 / (v * g^2 + h * (h - u * g)) * [-h g; -g*v g*u-h] * [c, d]
+            c = P[1] - u * b[begin + 0] - v * b[begin + 1]
+            d = P[0] - v * b[begin + 0]
+            g = b[begin + 1] - u * f[begin + 0] - v * f[begin + 1]
+            h = b[begin + 0] - v * f[begin + 0]
+            step = 1 / (v * g^2 + h * (h - u * g)) * [-h g; -g * v g * u - h] * [c, d]
             u, v = [u, v] - step
         end
         root = quadraticroot(Polynomial([v, u, 1]))
@@ -79,7 +78,7 @@ function bairstow(P::Polynomial)
         if abs(root) < 0.1
             println(root)
         end
-        if abs(error) > 1e-10
+        if abs(error) > 1.0e-10
             # println(error)
             push!(colours, :red, :red)
         else
@@ -89,11 +88,11 @@ function bairstow(P::Polynomial)
     end
     @show degree(P₀) length(roots) length(unique(roots))
 
-    display(Plots.scatter(roots, seriescolor=colours))
+    display(Plots.scatter(roots, seriescolor = colours))
     return roots
 end
 
-function newtonraphson(f, f′, initial; tol=1e-16, maxIter=1e5)
+function newtonraphson(f, f′, initial; tol = 1.0e-16, maxIter = 1.0e5)
     x = Complex{BigFloat}(initial)
     fx = f(x)
     iter = 0
@@ -118,7 +117,7 @@ function sub(P::Polynomial, s::Number)
     return P
 end
 
-function hubbard(P::Polynomial; ε=1e-10, R=3, rootcount=degree(P))
+function hubbard(P::Polynomial; ε = 1.0e-10, R = 3, rootcount = degree(P))
     roots = Vector{Complex{BigFloat}}()
     debug_roots = []
     nonconv = Vector{Complex{BigFloat}}()
@@ -140,7 +139,7 @@ function hubbard(P::Polynomial; ε=1e-10, R=3, rootcount=degree(P))
     max_N′ = N
     N′ = zeros(Int, max_N′) # More interesting enumeration of N
     i = 1
-    for r in 0:(d-1), q in 0:((max_N′-1-r)÷d)
+    for r in 0:(d - 1), q in 0:((max_N′ - 1 - r) ÷ d)
         N′[i] = q * d + r
         i += 1
     end
@@ -220,14 +219,15 @@ end
 #endregion
 
 function plot(q::Int, n::Int)
-    Plots.default(aspect_ratio=:equal, markersize=3, legend=false)
+    Plots.default(aspect_ratio = :equal, markersize = 3, legend = false)
     theme(:juno)
-
-    display(scatter(AMRVW.roots(BigFloat.(coeffs(Load.part(q, n))))))
+    return display(scatter(AMRVW.roots(BigFloat.(coeffs(Load.part(q, n))))))
 end
 
 function plot′(q::Int, n::Int)
-    display(scatter(AMRVW.roots(BigFloat.(coeffs(Load.part′(q, n))))))
+    Plots.default(aspect_ratio = :equal, markersize = 3, legend = false)
+    theme(:juno)
+    return display(scatter(AMRVW.roots(BigFloat.(coeffs(Load.part′(q, n))))))
 end
 
 end

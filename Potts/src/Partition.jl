@@ -1,7 +1,6 @@
 module Partition
 
-using FromFile
-@from "Load.jl" using Load
+using ..Load
 
 using Polynomials
 using LinearAlgebra: tr
@@ -9,20 +8,17 @@ using Bijections
 using OrderedCollections
 using BitIntegers
 using Combinatorics
+using Dates
 
 const Polynomial = Polynomial{UInt256} # `Polynomials.SparsePolynomial(c,d)` and `Polynomials.SparseVectorPolynomials(c,d)` don't work (the first stack overflows and the second assumes `d=1`). The first can be fixed with `Polynomials.SparsePolynomial([c],d)`.
 
 function part(q::Int, n::Int) # ising_part_periodic
-    if q == 2
-        Ω = Load.symmetry_class(n).ordered_configs
-    else
-        Ω = Iterators.product(Iterators.repeated(1:q, n)...)
-    end
+    Ω = Load.symmetry_class(q, n).ordered_configs
     T₀ = zeros(Polynomial, q^n, q^n)
     # T₁ = zeros(typeof(x), 2^n, 2^n)
 
     for (i, Ωᵢ) in zip(1:(q^n), Ω),
-        (j, Ωₒ) in zip(1:(q^n), Ω)
+            (j, Ωₒ) in zip(1:(q^n), Ω)
 
         # println(Ωᵢ)
         # println(Ωₒ)
@@ -60,10 +56,10 @@ function symmetry_group(q::Int, n::Int)
     D2n = Iterators.product(0:1, 1:n)
     SD = Iterators.product(Sq, D2n)
 
-    function act_on_tuple(tup::Tuple, g::Tuple{Tuple,Tuple{Int,Int}})
+    function act_on_tuple(tup::Tuple, g::Tuple{Tuple, Tuple{Int, Int}})
         s = g[1]
         d = g[2]
-        return s[(iszero(d[1]) ? identity : reverse)(collect(circshift(tup, d[2]-1)))]
+        return s[(iszero(d[1]) ? identity : reverse)(collect(circshift(tup, d[2] - 1)))]
     end
 
     return SD, act_on_tuple
@@ -71,14 +67,14 @@ end
 
 function symmetry_classes(q::Int, n::Int) # * Done
     Ω = Iterators.product(Iterators.repeated(1:q, n)...)
-    classes = Vector{Vector{Tuple{NTuple{q,Int},Tuple{Int,Int}}}}() # List of lists of product permutations
-    reps = Vector{NTuple{n,Int}}()
-    seen_configs = OrderedSet{NTuple{n,Int}}() # TODO: use the struct from Load?
+    classes = Vector{Vector{Tuple{NTuple{q, Int}, Tuple{Int, Int}}}}() # List of lists of product permutations
+    reps = Vector{NTuple{n, Int}}()
+    seen_configs = OrderedSet{NTuple{n, Int}}() # TODO: use the struct from Load?
 
     SD, act_on_tuple = symmetry_group(q, n)
     e = first(SD)
 
-    for config::NTuple{n,Int} in Ω
+    for config::NTuple{n, Int} in Ω
         if config in seen_configs
             continue
         end
@@ -99,7 +95,7 @@ function symmetry_classes(q::Int, n::Int) # * Done
     return classes, reps, collect(seen_configs)
 end
 
-function spart′(q::Int, n::Int) # ! Not done. Note prime notation is still backwards in the data for 2x2
+function spart′(q::Int, n::Int) # ! Not done. 2x2 prime means symmetry PO, non asymmetry PP; 3x3 prime indicates older algo using Oscar (need to fix all this - including these function names)
     (; classes, reps, ordered_configs) = Load.symmetry_class(q, n)
     class_enum = [(c, d) for c in 1:length(classes) for d in 1:length(classes[c])]
     config_by_index = Bijection([i => v for (i, v) in enumerate(ordered_configs)])
@@ -108,7 +104,7 @@ function spart′(q::Int, n::Int) # ! Not done. Note prime notation is still bac
     SD, act_on_tuple, (iSq, iD2n) = symmetry_group(q, n)
 
     for (i, Ωᵢ) in zip(1:length(classes), reps),
-        (j, sigma) in zip(1:(2^n), Iterators.flatten(classes))
+            (j, sigma) in zip(1:(2^n), Iterators.flatten(classes))
 
         Ωₒ = SD[sigma...](reps[class_enum[j][1]])
         p = 0
@@ -163,30 +159,31 @@ function spart′(q::Int, n::Int) # ! Not done. Note prime notation is still bac
 end
 
 function spart(q::Int, n::Int) # ! Doing
+    @info Dates.format(now(), "HH:MM:SS"), @__MODULE__, @__LINE__
     (; classes, reps) = Load.symmetry_class(q, n)
     class_enum = [(c, d) for c in 1:length(classes) for d in 1:length(classes[c])]
-    T = zeros(Polynomial, length(classes), 2^n)
+    T = zeros(Polynomial, length(classes), q^n)
 
     _, act_on_tuple = symmetry_group(q, n)
 
-    for (i, Ωᵢ) in zip(1:length(classes), reps),
-        (j, sigma) in zip(1:(2^n), Iterators.flatten(classes))
+    for (i, Ωᵢ) in zip(1:length(classes), reps), # TODO: parallelise this (is it already??)
+            (j, sigma) in zip(1:(q^n), Iterators.flatten(classes))
 
         Ωₒ = act_on_tuple(reps[class_enum[j][1]], sigma)
         p = 0
-        for r in 1:n
+        for r in 1:n # TODO: parallelise this (is it already??)
             p += Int(Ωᵢ[r] == Ωₒ[r])
             p += Int(Ωᵢ[r] == Ωᵢ[mod1(r + 1, n)])
         end
         T[i, j] = Polynomial([1], p)
     end
 
-    R = sum(T, dims=2)
+    R = sum(T, dims = 2)
     # display(Polynomials.Polynomial{BigInt}.(T))
 
     #region matrix-vector multiplication manual
-    for i in 1:(n-2)
-        # println(i)
+    for i in 1:(n - 2)
+        @info Dates.format(now(), "HH:MM:SS"), @__MODULE__, @__LINE__, i
         R_new = zeros(Polynomial, length(classes))
         Threads.@threads for i in 1:length(classes)
             for k in 1:(2^n)
