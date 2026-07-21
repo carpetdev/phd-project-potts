@@ -189,7 +189,7 @@ function spart(q::Int, n::Int) # ! Doing
         @logmsg Trace "vector multiplication $i"
         R_new = zeros(Polynomial, length(classes))
         Threads.@threads for i in 1:length(classes)
-            for k in 1:(2^n)
+            for k in 1:(q^n)
                 c, _ = class_enum[k]
                 R_new[i] += T[i, k] * R[c] # Try just making R a vector with repeats so you can do matrix-vector mulitiplication
             end
