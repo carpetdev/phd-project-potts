@@ -4,7 +4,6 @@ using ..Load
 
 using Polynomials
 using Plots
-using ProgressLogging
 using Random
 # using Attractors
 # using CairoMakie
@@ -149,7 +148,7 @@ function hubbard(P::Polynomial; ε = 1.0e-10, R = 3, rootcount = degree(P))
     K = ceil(Int, d * log(R / ε))
     # K = 10_000
     @show K
-    @progress for point in S
+    for point in S
         if length(roots) >= rootcount
             return roots
         end

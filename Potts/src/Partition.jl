@@ -10,6 +10,7 @@ using OrderedCollections
 using BitIntegers
 using Combinatorics
 using Dates
+using ProgressMeter
 
 const Polynomial = Polynomial{UInt256} # `Polynomials.SparsePolynomial(c,d)` and `Polynomials.SparseVectorPolynomials(c,d)` don't work (the first stack overflows and the second assumes `d=1`). The first can be fixed with `Polynomials.SparsePolynomial([c],d)`.
 
@@ -162,23 +163,24 @@ function spart(q::Int, n::Int) # ! Not done
 end
 
 function spart′(q::Int, n::Int) # * Done. Recall prime means one BC is open
-    @logmsg Trace "starting"
     (; classes, reps) = Load.symmetry_class(q, n)
     class_enum = [(c, d) for c in 1:length(classes) for d in 1:length(classes[c])]
     T = zeros(Polynomial, length(classes), q^n)
 
     _, act_on_tuple = symmetry_group(q, n)
 
-    for (i, Ωᵢ) in zip(1:length(classes), reps), # TODO: parallelise this (is it already??)
-            (j, sigma) in zip(1:(q^n), Iterators.flatten(classes))
+    @logmsg Trace "building transfer matrix"
+    @showprogress for (i, Ωᵢ) in zip(1:length(classes), reps) # TODO: parallelise this (is it already??)
+        for (j, sigma) in zip(1:(q^n), Iterators.flatten(classes))
 
-        Ωₒ = act_on_tuple(reps[class_enum[j][1]], sigma)
-        p = 0
-        for r in 1:n # TODO: parallelise this (is it already??)
-            p += Int(Ωᵢ[r] == Ωₒ[r])
-            p += Int(Ωᵢ[r] == Ωᵢ[mod1(r + 1, n)])
+            Ωₒ = act_on_tuple(reps[class_enum[j][1]], sigma)
+            p = 0
+            for r in 1:n # TODO: parallelise this (is it already??)
+                p += Int(Ωᵢ[r] == Ωₒ[r])
+                p += Int(Ωᵢ[r] == Ωᵢ[mod1(r + 1, n)])
+            end
+            T[i, j] = Polynomial([1], p)
         end
-        T[i, j] = Polynomial([1], p)
     end
 
     R = sum(T, dims = 2)
@@ -186,7 +188,7 @@ function spart′(q::Int, n::Int) # * Done. Recall prime means one BC is open
 
     #region matrix-vector multiplication manual
     for i in 1:(n - 2)
-        @logmsg Trace "vector multiplication $i"
+        @logmsg Trace "vector multiplication $i/$(n - 2)"
         R_new = zeros(Polynomial, length(classes))
         Threads.@threads for i in 1:length(classes)
             for k in 1:(q^n)

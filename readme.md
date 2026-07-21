@@ -15,4 +15,4 @@ to install all dependencies (first time only). Press Backspace to return to the 
 ```julia
 julia> using Potts
 ```
-to import the package. This automatically runs `Potts.menu()`, but the modules defined in `Potts/src` are also available to the REPL.
+to import the package. This automatically runs `Potts.menu()`, but the modules defined in `Potts/src` are also available to the REPL. Note the menu's options perform calculations with periodic-open boundary conditions.

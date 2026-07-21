@@ -12,8 +12,8 @@ using REPL.TerminalMenus
 
 @compile_workload begin
     Save.classes(2, 1)
-    Save.part(2, 1)
-    Roots.plot(2, 1)
+    Save.part′(2, 1)
+    Roots.plot′(2, 1)
 end
 
 # struct TransferMatrix <: AbstractMatrix{Tuple{Int}}
