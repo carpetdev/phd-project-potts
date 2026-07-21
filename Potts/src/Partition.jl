@@ -98,7 +98,7 @@ function symmetry_classes(q::Int, n::Int) # * Done
     return classes, reps, collect(seen_configs)
 end
 
-function spart′(q::Int, n::Int) # ! Not done. 2x2 prime means symmetry PO, non asymmetry PP; 3x3 prime indicates older algo using Oscar (need to fix all this - including these function names)
+function spart(q::Int, n::Int) # ! Not done
     (; classes, reps, ordered_configs) = Load.symmetry_class(q, n)
     class_enum = [(c, d) for c in 1:length(classes) for d in 1:length(classes[c])]
     config_by_index = Bijection([i => v for (i, v) in enumerate(ordered_configs)])
@@ -161,7 +161,7 @@ function spart′(q::Int, n::Int) # ! Not done. 2x2 prime means symmetry PO, non
     return partition
 end
 
-function spart(q::Int, n::Int) # ! Doing
+function spart′(q::Int, n::Int) # * Done. Recall prime means one BC is open
     @logmsg Trace "starting"
     (; classes, reps) = Load.symmetry_class(q, n)
     class_enum = [(c, d) for c in 1:length(classes) for d in 1:length(classes[c])]

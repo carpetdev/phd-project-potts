@@ -54,17 +54,17 @@ function menu()
     end
 
     if choice == 1 || choice == 2
-        if !isfile("data/parts/$(q)_$(n).json")
+        if !isfile("data/parts/$(q)_$(n)'.json")
             println("Calculating partition function for q=$(q), n=$(n) and saving to \'data/parts/$(q)_$(n).json\'")
-            Save.part(q, n)
+            Save.part′(q, n)
         else
-            println("Partition function for q=$(q), n=$(n) exists at \'data/symmetry/$(q)_$(n).json\'")
+            println("Partition function for q=$(q), n=$(n) exists at \'data/symmetry/$(q)_$(n)'.json\'")
         end
     end
 
     if choice == 1
         println("Plotting roots for for q=$(q), n=$(n)")
-        Roots.plot(q, n)
+        Roots.plot′(q, n)
     end
 
     println("Done!")

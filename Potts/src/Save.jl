@@ -5,8 +5,14 @@ using ..Partition
 using JSON
 
 function part(q::Int, n::Int)
-    part = Partition.spart(q, n)
+    part = Partition.part(q, n)
     JSON.json(Utils.data_pather("parts/$(q)_$(n).json"), part)
+    return
+end
+
+function part′(q::Int, n::Int)
+    part = Partition.spart′(q, n)
+    JSON.json(Utils.data_pather("parts/$(q)_$(n)'.json"), part)
     return
 end
 
