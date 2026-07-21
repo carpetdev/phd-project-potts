@@ -1,5 +1,6 @@
 module Partition
 
+using ..Utils
 using ..Load
 
 using Polynomials
@@ -11,6 +12,8 @@ using Combinatorics
 using Dates
 
 const Polynomial = Polynomial{UInt256} # `Polynomials.SparsePolynomial(c,d)` and `Polynomials.SparseVectorPolynomials(c,d)` don't work (the first stack overflows and the second assumes `d=1`). The first can be fixed with `Polynomials.SparsePolynomial([c],d)`.
+
+Base.show(io::IO, mime::MIME"text/plain", p::Polynomial) = Base.show(io, mime, Polynomials.Polynomial{BigInt}(p))
 
 function part(q::Int, n::Int) # ising_part_periodic
     Ω = Load.symmetry_class(q, n).ordered_configs
@@ -159,7 +162,7 @@ function spart′(q::Int, n::Int) # ! Not done. 2x2 prime means symmetry PO, non
 end
 
 function spart(q::Int, n::Int) # ! Doing
-    @info Dates.format(now(), "HH:MM:SS"), @__MODULE__, @__LINE__
+    @logmsg Trace "starting"
     (; classes, reps) = Load.symmetry_class(q, n)
     class_enum = [(c, d) for c in 1:length(classes) for d in 1:length(classes[c])]
     T = zeros(Polynomial, length(classes), q^n)
@@ -183,7 +186,7 @@ function spart(q::Int, n::Int) # ! Doing
 
     #region matrix-vector multiplication manual
     for i in 1:(n - 2)
-        @info Dates.format(now(), "HH:MM:SS"), @__MODULE__, @__LINE__, i
+        @logmsg Trace "vector multiplication $i"
         R_new = zeros(Polynomial, length(classes))
         Threads.@threads for i in 1:length(classes)
             for k in 1:(2^n)

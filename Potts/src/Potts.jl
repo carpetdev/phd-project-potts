@@ -29,10 +29,15 @@ end
 # end
 
 function __init__()
+    menu()
+    return
+end
+
+function menu()
     isinteractive() || return
-    menu = RadioMenu(["Plot roots of partition function", "Calculate partition function", "Calculate symmetry classes"], ctrl_c_interrupt = false)
+    task_menu = RadioMenu(["Plot roots of partition function", "Calculate partition function", "Calculate symmetry classes"], ctrl_c_interrupt = false)
     println("Choose an option (press ^C or q to cancel):")
-    choice = request(menu)
+    choice = request(task_menu)
 
     if choice == -1
         return
@@ -64,7 +69,8 @@ function __init__()
 
     println("Done!")
     println()
-    return __init__()
+    menu()
+    return
 end
 
 end
