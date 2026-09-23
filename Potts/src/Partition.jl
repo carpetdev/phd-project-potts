@@ -105,7 +105,7 @@ function spart(q::Int, n::Int) # ! Not done
     config_by_index = Bijection([i => v for (i, v) in enumerate(ordered_configs)])
     T = zeros(Polynomial, length(classes), q^n)
 
-    SD, act_on_tuple, (iSq, iD2n) = symmetry_group(q, n)
+    SD, act_on_tuple = symmetry_group(q, n)
 
     for (i, Ωᵢ) in zip(1:length(classes), reps),
             (j, sigma) in zip(1:(2^n), Iterators.flatten(classes))
@@ -169,10 +169,9 @@ function spart′(q::Int, n::Int) # * Done. Recall prime means one BC is open
 
     _, act_on_tuple = symmetry_group(q, n)
 
-    @logmsg Trace "building transfer matrix"
-    @showprogress for (i, Ωᵢ) in zip(1:length(classes), reps) # TODO: parallelise this (is it already??)
+    progress = Progress(length(classes), desc = "building transfer matrix")
+    Threads.@threads for (i, Ωᵢ) in zip(1:length(classes), reps) # TODO: parallelise this (is it already??)
         for (j, sigma) in zip(1:(q^n), Iterators.flatten(classes))
-
             Ωₒ = act_on_tuple(reps[class_enum[j][1]], sigma)
             p = 0
             for r in 1:n # TODO: parallelise this (is it already??)
@@ -181,6 +180,7 @@ function spart′(q::Int, n::Int) # * Done. Recall prime means one BC is open
             end
             T[i, j] = Polynomial([1], p)
         end
+        next!(progress)
     end
 
     R = sum(T, dims = 2)
@@ -193,7 +193,7 @@ function spart′(q::Int, n::Int) # * Done. Recall prime means one BC is open
         Threads.@threads for i in 1:length(classes)
             for k in 1:(q^n)
                 c, _ = class_enum[k]
-                R_new[i] += T[i, k] * R[c] # Try just making R a vector with repeats so you can do matrix-vector mulitiplication
+                R_new[i] += T[i, k] * R[c] # Try just making R a vector with repeats so you can do matrix-vector multiplication
             end
         end
         R = R_new
